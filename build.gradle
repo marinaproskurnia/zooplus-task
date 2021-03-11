@@ -1,0 +1,58 @@
+buildscript {
+    ext {
+        allureVersion = '2.13.2'
+        apachePoiOoxm = '4.1.2'
+        aeonbitsOwnerVersion = '1.0.12'
+        aspectjVersion = '1.9.4'
+        springBootStarterVersion = '2.4.3'
+        lombokVersion = '1.18.16'
+        junitVersion = '5.6.0'
+        guiceVersion = '5.0.1'
+    }
+}
+
+plugins {
+    id 'java'
+    id 'io.freefair.lombok' version '4.1.5'
+    id 'io.qameta.allure' version '2.8.1'
+}
+
+group 'com.zooplus.petstore'
+version '1.0.0'
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+}
+
+allure {
+    autoconfigure = true
+    aspectjweaver = true
+    version = "$allureVersion"
+    useJUnit5 { version = "$allureVersion" }
+}
+
+dependencies {
+    compile("org.aspectj:aspectjweaver:$aspectjVersion")
+    compile("org.apache.poi:poi-ooxml:$apachePoiOoxm")
+    compile("org.apache.poi:poi:$apachePoiOoxm")
+    compile("org.projectlombok:lombok:$lombokVersion")
+    compile("com.google.inject:guice:${guiceVersion}")
+    compile("io.qameta.allure:allure-junit5:$allureVersion")
+    compile("io.qameta.allure:allure-spring-web:$allureVersion")
+
+    implementation("org.springframework.boot:spring-boot-starter-test:$springBootStarterVersion")
+    implementation("org.springframework.boot:spring-boot-starter-web:$springBootStarterVersion")
+    implementation "org.aeonbits.owner:owner:${aeonbitsOwnerVersion}"
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+test {
+    useJUnitPlatform()
+}
