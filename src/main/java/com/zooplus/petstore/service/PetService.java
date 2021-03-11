@@ -3,11 +3,14 @@ package com.zooplus.petstore.service;
 import com.google.inject.Inject;
 import com.zooplus.petstore.databind.RequestBodyConverter;
 import com.zooplus.petstore.model.Pet;
+import com.zooplus.petstore.model.PetUpdateStatus;
 import com.zooplus.petstore.model.Status;
 import io.qameta.allure.Step;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -18,8 +21,7 @@ import static java.lang.String.valueOf;
 import static org.springframework.http.HttpHeaders.ACCEPT;
 import static org.springframework.http.HttpMethod.DELETE;
 import static org.springframework.http.HttpMethod.PUT;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.*;
 
 public class PetService {
 
@@ -65,20 +67,38 @@ public class PetService {
     }
 
     @Step("Deletes a pet")
-    public ResponseEntity<String> deletePet(final long petId) {
+    public ResponseEntity<PetUpdateStatus> deletePet(final long petId) {
         final var uri = UriComponentsBuilder.fromUriString(PET_ENDPOINT)
                 .pathSegment(valueOf(petId))
                 .build().toUri();
         final var headers = new HttpHeaders();
         headers.set(ACCEPT, APPLICATION_JSON_VALUE);
-        return testRestTemplate.exchange(uri, DELETE, new HttpEntity<>(headers), String.class);
+        return testRestTemplate.exchange(uri, DELETE, new HttpEntity<>(headers), PetUpdateStatus.class);
+    }
+
+    @Step("Updates a pet in the store with form data")
+    public ResponseEntity<PetUpdateStatus> updatePetWithFormData(final long petId, String name, String status) {
+        final var uri = UriComponentsBuilder.fromUriString(PET_ENDPOINT)
+                .pathSegment(valueOf(petId))
+                .build().toUri();
+        final var headers = getHttpHeaders(APPLICATION_FORM_URLENCODED);
+        final var request = MultipartEntityBuilder.create()
+                .addTextBody("name", name)
+                .addTextBody("status", status)
+                .build();
+        return testRestTemplate.postForEntity(uri, request, PetUpdateStatus.class);
+    }
+
+    private HttpHeaders getHttpHeaders(final MediaType applicationFormUrlencoded) {
+        final var headers = new HttpHeaders();
+        headers.set(ACCEPT, APPLICATION_JSON_VALUE);
+        headers.setContentType(applicationFormUrlencoded);
+        return headers;
     }
 
     private HttpEntity<String> getRequestInJsonFormat(final Pet body) {
         final var requestBody = requestBodyConverter.convertRequestBodyToString(body);
-        final var headers = new HttpHeaders();
-        headers.set(ACCEPT, APPLICATION_JSON_VALUE);
-        headers.setContentType(APPLICATION_JSON);
+        final var headers = getHttpHeaders(APPLICATION_JSON);
         return new HttpEntity<>(requestBody, headers);
     }
 

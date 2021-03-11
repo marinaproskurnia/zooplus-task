@@ -8,6 +8,8 @@ buildscript {
         lombokVersion = '1.18.16'
         junitVersion = '5.6.0'
         guiceVersion = '5.0.1'
+        urlSearchParamsVersion = '1.1.0'
+        httpmimeVersion = '4.3.1'
     }
 }
 
@@ -46,7 +48,8 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-test:$springBootStarterVersion")
     implementation("org.springframework.boot:spring-boot-starter-web:$springBootStarterVersion")
-    implementation "org.aeonbits.owner:owner:${aeonbitsOwnerVersion}"
+    implementation("org.aeonbits.owner:owner:${aeonbitsOwnerVersion}")
+    implementation("org.apache.httpcomponents:httpmime:${httpmimeVersion}")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
 

@@ -7,6 +7,7 @@ import com.zooplus.petstore.bindings.PetstoreModule;
 import com.zooplus.petstore.data.PetDataProvider;
 import com.zooplus.petstore.model.Category;
 import com.zooplus.petstore.model.Pet;
+import com.zooplus.petstore.model.PetUpdateStatus;
 import com.zooplus.petstore.service.PetService;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +26,7 @@ import static com.zooplus.petstore.model.Status.PENDING;
 import static com.zooplus.petstore.model.Status.SOLD;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.util.StringUtils.capitalize;
 
 @DisplayName("Checks everything about your Pets.")
@@ -223,5 +225,28 @@ public class PetTest {
         ResponseAssertion.assertThat(response)
                 .as("Pet not found")
                 .isRecordNotFound();
+    }
+
+    @Test
+    @DisplayName("Update pet name and status via it's ID")
+    void checkPetNameAndStatusCouldBeUpdatedViaId() {
+        final var id = VALID_PET_DATA.getId();
+        final var response = petService.updatePetWithFormData(id,
+                VALID_PET_DATA.getName() + "_2",
+                "sold");
+        final var petUpdatedReport = ResponseAssertion.assertThat(response)
+                .as("Pet name and status changed successfully")
+                .isStatusOk()
+                .hasBody()
+                .getBody();
+        final var expectedUpdateReport = PetUpdateStatus.builder()
+                .code(OK.value())
+                .message(String.valueOf(id))
+                .build();
+        assertThat(petUpdatedReport)
+                .as(format("Check pet with ID '%s' was updated successfully ", id))
+                .usingRecursiveComparison()
+                .ignoringFields("type")
+                .isEqualTo(expectedUpdateReport);
     }
 }
