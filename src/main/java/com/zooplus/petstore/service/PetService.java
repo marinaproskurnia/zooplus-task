@@ -12,6 +12,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -77,15 +79,16 @@ public class PetService {
     }
 
     @Step("Updates a pet in the store with form data")
-    public ResponseEntity<PetUpdateStatus> updatePetWithFormData(final long petId, String name, String status) {
+    public ResponseEntity<PetUpdateStatus> updatePetWithFormData(final long petId, final String name,
+                                                                 final String status) {
         final var uri = UriComponentsBuilder.fromUriString(PET_ENDPOINT)
                 .pathSegment(valueOf(petId))
                 .build().toUri();
         final var headers = getHttpHeaders(APPLICATION_FORM_URLENCODED);
-        final var request = MultipartEntityBuilder.create()
-                .addTextBody("name", name)
-                .addTextBody("status", status)
-                .build();
+        final var updatedParams = new LinkedMultiValueMap<>();
+        updatedParams.add("name", name);
+        updatedParams.add("status", status);
+        final var request = new HttpEntity<>(updatedParams, headers);
         return testRestTemplate.postForEntity(uri, request, PetUpdateStatus.class);
     }
 
