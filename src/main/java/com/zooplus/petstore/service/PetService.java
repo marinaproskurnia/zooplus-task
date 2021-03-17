@@ -92,6 +92,19 @@ public class PetService {
         return testRestTemplate.postForEntity(uri, request, PetUpdateStatus.class);
     }
 
+    @Step("Uploads an image by Pet's ID")
+    public ResponseEntity<PetUpdateStatus> uploadImageById(final long petId, final String fileName) {
+        final var uri = UriComponentsBuilder.fromUriString(PET_ENDPOINT)
+                .pathSegment(valueOf(petId))
+                .pathSegment("uploadImage")
+                .build().toUri();
+        final var headers = getHttpHeaders(MULTIPART_FORM_DATA);
+        final var body = new LinkedMultiValueMap<>();
+        body.add("file", fileName);
+        final var request = new HttpEntity<>(body, headers);
+        return testRestTemplate.postForEntity(uri, request, PetUpdateStatus.class);
+    }
+
     private HttpHeaders getHttpHeaders(final MediaType applicationFormUrlencoded) {
         final var headers = new HttpHeaders();
         headers.set(ACCEPT, APPLICATION_JSON_VALUE);

@@ -228,6 +228,7 @@ public class PetTest {
     }
 
     @Test
+    @Order(2)
     @DisplayName("Update pet name and status via it's ID")
     void checkPetNameAndStatusCouldBeUpdatedViaId() {
         final var id = VALID_PET_DATA.getId();
@@ -236,6 +237,29 @@ public class PetTest {
                 "sold");
         final var petUpdatedReport = ResponseAssertion.assertThat(response)
                 .as("Pet name and status changed successfully")
+                .isStatusOk()
+                .hasBody()
+                .getBody();
+        final var expectedUpdateReport = PetUpdateStatus.builder()
+                .code(OK.value())
+                .message(String.valueOf(id))
+                .build();
+        assertThat(petUpdatedReport)
+                .as(format("Check pet with ID '%s' was updated successfully ", id))
+                .usingRecursiveComparison()
+                .ignoringFields("type")
+                .isEqualTo(expectedUpdateReport);
+    }
+
+    @Test
+    @Order(2)
+    @DisplayName("Upload Pet image")
+    void checkPetImageCouldBeUploaded() {
+        final var id = VALID_PET_DATA.getId();
+        final var imageFile = "pet.png";
+        final var response = petService.uploadImageById(id, imageFile);
+        final var petUpdatedReport = ResponseAssertion.assertThat(response)
+                .as("Pet image uploaded successfully")
                 .isStatusOk()
                 .hasBody()
                 .getBody();
